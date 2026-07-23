@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrada · Santa Fe vs. Caracas</title>
+  <style>
+    :root {
+      --azul-1: #1747c9;
+      --azul-2: #2f6df0;
+      --crema: #f7f5f2;
+      --tinta: #1b2340;
+      --tinta-suave: #7c8199;
+      --gris-chip: #efeef4;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      background: #0a0a0a;
+      font-family: -apple-system, 'SF Pro Text', "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .screen {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--azul-2);
+      position: relative;
+      padding-bottom: 40px;
+    }
+
+    /* ---------- ENCABEZADO ---------- */
+    .header {
+      background: linear-gradient(180deg, var(--azul-1), var(--azul-2));
+      color: #fff;
+      padding: 6px 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .header .back {
+      position: absolute;
+      left: 18px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .header .title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      padding-bottom: 14px;
+      background: var(--azul-2);
+    }
+
+    .dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .9);
+    }
+
+    /* ---------- CAJA QR (fija, sticky) ---------- */
+    .qr-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--azul-2);
+      padding: 14px 14px 6px;
+    }
+
+    .qr-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .18);
+      position: relative;
+    }
+
+    .qr-frame {
+      position: relative;
+      width: 128px;
+      height: 128px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-frame canvas {
+      width: 110px;
+      height: 110px;
+      image-rendering: pixelated;
+    }
+
+    .qr-time {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, .72);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Culebritas que recorren el borde del QR (sentido horario) */
+    .snake-border {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: calc(100% + 12px);
+      height: calc(100% + 12px);
+      overflow: visible;
+    }
+
+    .snake-border rect {
+      fill: none;
+      stroke: var(--azul-1);
+      stroke-width: 3;
+      stroke-linecap: butt;
+      animation: recorrer 3s linear infinite;
+    }
+
+    .snake-border rect.guia {
+      stroke: #d9dae0;
+      stroke-width: 1;
+      animation: none;
+    }
+
+    @keyframes recorrer {
+      from {
+        stroke-dashoffset: 0;
+      }
+
+      to {
+        stroke-dashoffset: -200;
+      }
+    }
+
+
+    /* ---------- TARJETA DE INFO ---------- */
+    .info-card {
+      background: var(--crema);
+      padding: 26px 22px 34px;
+      margin: 0 14px 14px;
+      border-radius: 22px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .15);
+      text-align: center;
+    }
+
+    .equipos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 46px;
+      background: #d7d5cf;
+    }
+
+    /* Logos de los equipos/torneo */
+    .logo-equipo {
+      height: 100px;
+      width: auto;
+      max-width: 84px;
+      object-fit: contain;
+    }
+
+    .logo-torneo {
+      height: 160px;
+      width: auto;
+      max-width: 96px;
+      object-fit: contain;
+    }
+
+    h1.partido {
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--tinta);
+      margin: 4px 0 14px;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--tinta-suave);
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .meta svg {
+      flex-shrink: 0;
+    }
+
+    .chip-solo {
+      background: var(--gris-chip);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 22px auto 0;
+      width: fit-content;
+    }
+
+    .chip-label {
+      font-size: 11px;
+      letter-spacing: .6px;
+      color: var(--tinta-suave);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .chip-value {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--tinta);
+      margin-top: 2px;
+    }
+
+    .fila-chips {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      justify-content: center;
+    }
+
+    .chip-grande {
+      flex: 1;
+      background: var(--gris-chip);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .chip-chico {
+      background: var(--gris-chip);
+      border-radius: 12px;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .fila-doble {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    .fila-doble .chip-chico {
+      flex: 1;
+    }
+
+    .sep {
+      border: none;
+      border-top: 2px dashed #d7d5cf;
+      margin: 26px 0 16px;
+    }
+
+    .pie {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .pie .fila-pie {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .pie .valor {
+      color: var(--tinta);
+      font-weight: 400;
+      font-size: 13px;
+    }
+
+    .pie .label {
+      font-size: 11px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--tinta-suave);
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 22px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--azul-2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="screen">
+
+    <div class="header">
+      <span class="back">←</span>
+      <span class="title">Entrada 1 de 1</span>
+    </div>
+    <div class="dots"><span></span></div>
+
+    <div class="qr-wrap">
+      <div class="qr-card">
+        <div class="qr-frame">
+          <canvas id="qr" width="34" height="34"></canvas>
+          <div class="qr-time" id="qr-hora">00:00:00</div>
+          <svg class="snake-border" viewBox="0 0 140 140">
+            <rect class="guia" x="3" y="3" width="134" height="134" rx="0"></rect>
+            <rect x="3" y="3" width="134" height="134" rx="0" pathLength="200" stroke-dasharray="26 74"></rect>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="equipos">
+        <div class="logo-equipo-wrap">
+          <img class="logo-equipo"
+            src="https://upload.wikimedia.org/wikipedia/commons/5/58/Escudo_de_Independiente_Santa_Fe.png"
+            alt="Escudo Independiente Santa Fe">
+        </div>
+        <div class="divider-v"></div>
+        <div class="logo-torneo-wrap">
+          <img class="logo-torneo"
+            src="https://cdn.conmebol.com/wp-content/uploads/2021/10/logo_conmebol_sudamericana.png"
+            alt="Logo CONMEBOL Sudamericana">
+        </div>
+      </div>
+
+      <h1 class="partido">SANTA FE Vs. CARACAS</h1>
+
+      <div class="meta">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        23 JUL 26, 19:30
+      </div>
+      <div class="meta">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        Estadio El Campín
+      </div>
+
+      <div class="chip-solo">
+        <div class="chip-label">Puerta</div>
+        <div class="chip-value">Oriental</div>
+      </div>
+
+      <div class="fila-chips">
+        <div class="chip-grande">
+          <div class="chip-label">Sector</div>
+          <div class="chip-value">ORI. PREF NORTE ALTA</div>
+        </div>
+        <div class="chip-chico">
+          <div class="chip-label">Bloque</div>
+          <div class="chip-value">6</div>
+        </div>
+      </div>
+
+      <div class="fila-doble">
+        <div class="chip-chico">
+          <div class="chip-label">Fila</div>
+          <div class="chip-value">Z</div>
+        </div>
+        <div class="chip-chico">
+          <div class="chip-label">Silla</div>
+          <div class="chip-value">102</div>
+        </div>
+      </div>
+
+      <hr class="sep">
+
+      <div class="pie">
+        <div class="fila-pie">
+          <div class="label">Categoría</div>
+          <div class="valor">ORI. PREF NORTE ALTA</div>
+        </div>
+        <div class="fila-pie">
+          <div class="label">Tarifa</div>
+          <div class="valor">Abonados Antiguos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fab">⋮</div>
+  </div>
+
+  <script>
+    // ---- Hora en tiempo real (barra de estado + sobre el QR) ----
+    function actualizarHora() {
+      const ahora = new Date();
+      const hh = String(ahora.getHours()).padStart(2, '0');
+      const mm = String(ahora.getMinutes()).padStart(2, '0');
+      const ss = String(ahora.getSeconds()).padStart(2, '0');
+      document.getElementById('qr-hora').textContent = `${hh}:${mm}:${ss}`;
+    }
+    actualizarHora();
+    setInterval(actualizarHora, 1000);
+
+    // ---- Generar un QR "inventado" (patrón visual, no un código real) ----
+    function dibujarQRFalso() {
+      const canvas = document.getElementById('qr');
+      const ctx = canvas.getContext('2d');
+      const n = 34; // módulos por lado
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, n, n);
+      ctx.fillStyle = '#111';
+
+      // patrón pseudoaleatorio (cambia en cada carga, solo decorativo)
+      for (let y = 0; y < n; y++) {
+        for (let x = 0; x < n; x++) {
+          if (Math.random() > 0.52) {
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+
+      // ojos de posición (esquinas típicas de un QR)
+      function ojo(px, py) {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(px, py, 7, 7);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(px, py, 7, 7);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(px + 1, py + 1, 5, 5);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(px + 2, py + 2, 3, 3);
+      }
+      ojo(0, 0);
+      ojo(n - 7, 0);
+      ojo(0, n - 7);
+    }
+    dibujarQRFalso();
+  </script>
+
+</body>
+
+</html>
